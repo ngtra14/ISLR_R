@@ -7,6 +7,7 @@ library(ISLR)
 
 fix(Boston)
 names(Boston)
+attach(Boston)
 lm.fit <- lm(medv~lstat)
 lm.fit <- lm(medv~lstat,data=Boston)
 attach(Boston)
