@@ -1,9 +1,9 @@
 # VIDEO 1
-
+library(tidyverse)
 # Read in the data
-NBA = read.csv("NBA_train.csv")
+NBA = read.csv("Data/NBA_train.csv")
 str(NBA)
-
+head(NBA)
 
 # VIDEO 2
 
@@ -14,7 +14,7 @@ table(NBA$W, NBA$Playoffs)
 NBA$PTSdiff = NBA$PTS - NBA$oppPTS
 
 # Check for linear relationship
-plot(NBA$PTSdiff, NBA$W)
+qplot(NBA$PTSdiff, NBA$W)
 
 # Linear regression model for wins
 WinsReg = lm(W ~ PTSdiff, data=NBA)
@@ -57,13 +57,10 @@ RMSE_4 = sqrt(SSE_4/nrow(NBA))
 SSE_4
 RMSE_4
 
-
-
-
 # VIDEO 4
 
 # Read in test set
-NBA_test = read.csv("NBA_test.csv")
+NBA_test = read.csv("Data/NBA_test.csv")
 
 # Make predictions on test set
 PointsPredictions = predict(PointsReg4, newdata=NBA_test)
@@ -77,3 +74,14 @@ R2
 # Compute the RMSE
 RMSE = sqrt(SSE/nrow(NBA_test))
 RMSE
+
+# to use 'best subset' to find the best model
+library(leaps)
+# The goal is to predict salaries for each player
+regfit.bwd <- regsubsets(PTS ~ X2PA + X3PA + FTA + AST + ORB + DRB + TOV + STL + BLK,
+                         data=NBA,nvmax=9,method="backward")
+summary(regfit.bwd)
+
+regfit.fwd <- regsubsets(PTS ~ X2PA + X3PA + FTA + AST + ORB + DRB + TOV + STL + BLK,
+                         data=NBA,nvmax=9,method="forward")
+summary(regfit.fwd)
