@@ -1,8 +1,9 @@
 # VIDEO 2
-
+library(tidyverse)
 # Read in data
-baseball = read.csv("baseball.csv")
-str(baseball)
+baseball = read.csv("Data/baseball.csv")
+# str(baseball)
+head(baseball)
 
 # Subset to only include moneyball years
 moneyball = subset(baseball, Year < 2002)
@@ -13,7 +14,10 @@ moneyball$RD = moneyball$RS - moneyball$RA
 str(moneyball)
 
 # Scatterplot to check for linear relationship
-plot(moneyball$RD, moneyball$W)
+qplot(moneyball$RD, moneyball$W)
+
+# check overall correlations
+pairs(moneyball[c('RS', 'OBP', 'SLG', 'BA')])
 
 # Regression model to predict wins
 WinsReg = lm(W ~ RD, data=moneyball)
