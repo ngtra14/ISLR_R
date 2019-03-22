@@ -1,3 +1,5 @@
+# correct corpus creation
+# reference : datacamp - common text mining visuals
 # Unit 5 - Recitation
 
 # Video 2
@@ -28,17 +30,23 @@ library(tm)
 library(SnowballC)
 
 # Create corpus
+email_source <- VectorSource(emails$email)
+corpus <- VCorpus(email_source)
 
-corpus <- Corpus(VectorSource(emails$email))
+# corpus <- Corpus(VectorSource(emails$email))
 
 corpus[[1]]
 
 
 # Pre-process data
 corpus <- tm_map(corpus, tolower)
-strwrap(corpus[[1]])
 
-# IMPORTANT NOTE: If you are using the latest version of the tm package, you will need to run the following line before continuing (it converts corpus to a Plain Text Document). This is a recent change having to do with the tolower function that occurred after this video was recorded.
+# strwrap(corpus[[1]])
+
+# IMPORTANT NOTE: If you are using the latest version of the tm package, you will need to 
+# run the following line before continuing (it converts corpus to a Plain Text Document). 
+# This is a recent change having to do with the tolower function that occurred after this 
+# video was recorded.
 corpus <- tm_map(corpus, PlainTextDocument)
 
 corpus <- tm_map(corpus, removePunctuation)
@@ -52,7 +60,7 @@ strwrap(corpus[[1]])
 
 # fix problem
 # https://stackoverflow.com/questions/32523544/how-to-remove-error-in-term-document-matrix-in-r/36161902
-corpus <- Corpus(VectorSource(corpus))
+# corpus <- Corpus(VectorSource(corpus))
 
 # Video 4
 
@@ -73,53 +81,44 @@ labeledTerms$responsive <- emails$responsive
 
 str(labeledTerms)
 
-
-
 # Video 5
-
-
 # Split the data
 
 library(caTools)
 
 set.seed(144)
 
-spl = sample.split(labeledTerms$responsive, 0.7)
+spl <- sample.split(labeledTerms$responsive, 0.7)
 
-train = subset(labeledTerms, spl == TRUE)
-test = subset(labeledTerms, spl == FALSE)
+train <-  subset(labeledTerms, spl == TRUE)
+test <-  subset(labeledTerms, spl == FALSE)
 
 # Build a CART model
 
 library(rpart)
 library(rpart.plot)
 
-emailCART = rpart(responsive~., data=train, method="class")
+emailCART <-  rpart(responsive~., data=train, method="class")
 
 prp(emailCART)
 
-
-
 # Video 6
-
 # Make predictions on the test set
 
-pred = predict(emailCART, newdata=test)
+pred <-  predict(emailCART, newdata=test)
 pred[1:10,]
-pred.prob = pred[,2]
+pred.prob <-  pred[,2]
 
 # Compute accuracy
 
 table(test$responsive, pred.prob >= 0.5)
 
-(195+25)/(195+25+17+20)
+(195+25)/(195+25+17+20) # 0.8560311
 
 # Baseline model accuracy
 
 table(test$responsive)
 215/(215+42)
-
-
 
 # Video 7
 
@@ -127,13 +126,13 @@ table(test$responsive)
 
 library(ROCR)
 
-predROCR = prediction(pred.prob, test$responsive)
+predROCR <-  prediction(pred.prob, test$responsive)
 
-perfROCR = performance(predROCR, "tpr", "fpr")
+perfROCR <-  performance(predROCR, "tpr", "fpr")
 
 plot(perfROCR, colorize=TRUE)
 
 # Compute AUC
 
-performance(predROCR, "auc")@y.values
+performance(predROCR, "auc")@y.values  # 0.7936323
 
