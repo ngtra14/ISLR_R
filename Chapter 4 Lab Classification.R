@@ -4,7 +4,7 @@
 
 library(ISLR)
 library(tidyverse)
-# EDA
+# --- EDA --- 
 glimpse(Smarket)
 head(Smarket)
 
@@ -12,8 +12,9 @@ head(Smarket)
 # dim(Smarket)
 # summary(Smarket)
 
-pairs(Smarket)
+pairs(Smarket, col=Smarket$Direction)
 cor(Smarket)
+
 cor(Smarket[,-9])
 
 attach(Smarket)
@@ -22,10 +23,24 @@ plot(Volume)
 # Use ggplot and others
 qplot(data=Smarket, y=Volume)
 
-# Logistic Regression
+Smarket %>% ggplot(aes(x=seq(1,1250), y=Volume, color=Direction)) +
+  geom_point()
+
+# --- Logistic Regression ---
 
 glm.fits <- glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,data=Smarket,family=binomial)
 summary(glm.fits)
+
+# Coefficients:
+# Estimate Std. Error z value Pr(>|z|)
+# (Intercept) -0.126000   0.240736  -0.523    0.601
+# Lag1        -0.073074   0.050167  -1.457    0.145
+# Lag2        -0.042301   0.050086  -0.845    0.398
+# Lag3         0.011085   0.049939   0.222    0.824
+# Lag4         0.009359   0.049974   0.187    0.851
+# Lag5         0.010313   0.049511   0.208    0.835
+# Volume       0.135441   0.158360   0.855    0.392
+
 coef(glm.fits)
 summary(glm.fits)$coef
 summary(glm.fits)$coef[,4]
@@ -33,27 +48,32 @@ summary(glm.fits)$coef[,4]
 # Prediction
 glm.probs <- predict(glm.fits,type="response")
 glm.probs[1:10]
-contrasts(Direction)
+contrasts(Smarket$Direction)
 
 glm.pred <- rep("Down",1250)
 glm.pred[glm.probs>.5] <- "Up"
+# glm.pred <- ifelse(glm.prob>0.5, "UP", "Down")
 
-table(glm.pred,Direction)
+table(glm.pred,Smarket$Direction)
 (507+145)/1250  # 0.5216, slightly better than random guess
 
 # Accuracy
-mean(glm.pred==Direction)
+mean(glm.pred==Smarket$Direction)
 
 # Split into "train" and "test" data set
-train <- (Year<2005)
+train <- (Smarket$Year<2005)
 Smarket.2005 <- Smarket[!train,]
 dim(Smarket.2005)
 
-Direction.2005 <- Direction[!train]
-glm.fits <- glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,data=Smarket,family=binomial,subset=train)
+Direction.2005 <- Smarket$Direction[!train]
+
+# fit the model again
+glm.fits <- glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,
+                data=Smarket,family=binomial,subset=train)
 glm.probs <- predict(glm.fits,Smarket.2005,type="response")
-glm.pred <- rep("Down",252)
-glm.pred[glm.probs>.5] <- "Up"
+glm.pred <- ifelse(glm.probs >0.5, "Up", "Down")
+# glm.pred <- rep("Down",252)
+# glm.pred[glm.probs>.5] <- "Up"
 
 table(glm.pred,Direction.2005)
 mean(glm.pred==Direction.2005)
@@ -66,20 +86,32 @@ glm.pred[glm.probs>.5] <- "Up"
 table(glm.pred,Direction.2005)
 mean(glm.pred==Direction.2005) #  0.5595238
 106/(106+76)
+summary(glm.fits)
 
 predict(glm.fits,newdata=data.frame(Lag1=c(1.2,1.5),Lag2=c(1.1,-0.8)),type="response")
 
-# Linear Discriminant Analysis
+# --- Linear Discriminant Analysis ---
 
 library(MASS)
 lda.fit <- lda(Direction~Lag1+Lag2,data=Smarket,subset=train)
 lda.fit
-plot(lda.fit)
+plot(lda.fit) # two similar histograms for this case
+
+# prediction
+Smarket.2005 <- subset(Smarket, Year=2005)
 lda.pred <- predict(lda.fit, Smarket.2005)
+lda.pred[1:5,] # check the type of class
+class(lda.pred) # 'list'
 names(lda.pred)
+
+# convert to a dataframe
+data.frame(lda.pred)[1:5, ]
+
+# construct confusion matrix
 lda.class <- lda.pred$class
-table(lda.class,Direction.2005)
-mean(lda.class==Direction.2005) # 0.5595238
+table(lda.class, Smarket.2005$Direction)
+
+mean(lda.class==Smarket.2005$Direction) # 0.5595238
 sum(lda.pred$posterior[,1]>=.5)
 sum(lda.pred$posterior[,1]<.5)
 lda.pred$posterior[1:20,1]
@@ -91,69 +123,5 @@ sum(lda.pred$posterior[,1]>.9)
 qda.fit <- qda(Direction~Lag1+Lag2,data=Smarket,subset=train)
 qda.fit
 qda.class <- predict(qda.fit,Smarket.2005)$class
-table(qda.class,Direction.2005)
-mean(qda.class==Direction.2005) # 0.5992063
-
-# K-Nearest Neighbors
-
-library(class)
-train.X <- cbind(Lag1,Lag2)[train,]
-test.X <- cbind(Lag1,Lag2)[!train,]
-
-train.Direction <- Direction[train]
-set.seed(1)
-knn.pred <- knn(train.X,test.X,train.Direction,k=1)
-table(knn.pred,Direction.2005) # 0.5
-(83+43)/252
-
-knn.pred <- knn(train.X,test.X,train.Direction,k=3)
-table(knn.pred,Direction.2005)
-mean(knn.pred==Direction.2005) # 0.5357143
-
-# Detach Smarket data set !!!
-detach(Smarket)
-
-# An Application to Caravan Insurance Data
-head(Caravan)
-dim(Caravan)
-attach(Caravan)
-summary(Purchase)
-348/5822
-glimpse(Caravan)
-
-# Scale the data sets
-standardized.X <- scale(Caravan[,-86])
-var(Caravan[,1])
-var(Caravan[,2])
-var(standardized.X[,1])
-var(standardized.X[,2])
-
-test <- 1:1000
-train.X <- standardized.X[-test,]
-test.X <- standardized.X[test,]
-train.Y <- Purchase[-test]
-test.Y <- Purchase[test]
-set.seed(1)
-knn.pred <- knn(train.X,test.X,train.Y,k=1)
-mean(test.Y!=knn.pred)
-mean(test.Y!="No")
-table(knn.pred,test.Y)
-9/(68+9)
-
-knn.pred <- knn(train.X,test.X,train.Y,k=3)
-table(knn.pred,test.Y)
-5/26
-
-knn.pred <- knn(train.X,test.X,train.Y,k=5)
-table(knn.pred,test.Y)
-4/15
-
-glm.fits <- glm(Purchase~.,data=Caravan,family=binomial,subset=-test)
-glm.probs <- predict(glm.fits,Caravan[test,],type="response")
-glm.pred <- rep("No",1000)
-glm.pred[glm.probs>.5] <- "Yes"
-table(glm.pred,test.Y)
-glm.pred<- rep("No",1000)
-glm.pred[glm.probs>.25] <- "Yes"
-table(glm.pred,test.Y)
-11/(22+11)
+table(qda.class, Smarket.2005$Direction)
+mean(qda.class==Smarket.2005$Direction) # 0.5992063
