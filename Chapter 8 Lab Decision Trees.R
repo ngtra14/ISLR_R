@@ -1,5 +1,5 @@
 # Chapter 8 Lab: Decision Trees
-Codes from this website
+# Codes from this website
 http://www-bcf.usc.edu/~gareth/ISL/index.html
 # Fitting Classification Trees
 
@@ -9,11 +9,12 @@ library(ISLR)
 head(Carseats)
 attach(Carseats)
 
-High=ifelse(Sales<=8,"No","Yes")
-Carseats=data.frame(Carseats,High)
+High <- ifelse(Sales<=8,"No","Yes")
+Carseats <- data.frame(Carseats,High)
 head(Carseats)
+str(Carseats) # High is 'factor' variable
 
-tree.carseats <- tree(High~.-Sales,Carseats)
+tree.carseats <- tree(High~.-Sales,Carseats) # excluding 'Sales'
 summary(tree.carseats)
 
 plot(tree.carseats)
@@ -60,7 +61,7 @@ table(tree.pred,High.test)
 
 # Fitting Regression Trees
 
-library(MASS)
+library(MASS) # need 'MASS' to get dataset 'Boston'
 set.seed(1)
 train <- sample(1:nrow(Boston), nrow(Boston)/2)
 tree.boston <- tree(medv~.,Boston,subset=train)
@@ -80,6 +81,8 @@ boston.test <- Boston[-train,"medv"]
 plot(yhat,boston.test)
 abline(0,1)
 mean((yhat-boston.test)^2)
+
+sqrt(mean((yhat-boston.test)^2)) # 5.004557
 
 # Bagging and Random Forests
 
@@ -109,8 +112,11 @@ varImpPlot(rf.boston)
 
 library(gbm)
 set.seed(1)
-boost.boston <- gbm(medv~.,data=Boston[train,],distribution="gaussian",n.trees=5000,interaction.depth=4)
+boost.boston <- gbm(medv~.,data=Boston[train,],distribution="gaussian",
+                    n.trees=5000,interaction.depth=4)
 summary(boost.boston)
+
+dev.off()
 
 par(mfrow=c(1,2))
 plot(boost.boston,i="rm")
@@ -119,6 +125,8 @@ plot(boost.boston,i="lstat")
 yhat.boost <- predict(boost.boston,newdata=Boston[-train,],n.trees=5000)
 mean((yhat.boost-boston.test)^2) # 11.84434
 
-boost.boston <- gbm(medv~.,data=Boston[train,],distribution="gaussian",n.trees=5000,interaction.depth=4,shrinkage=0.2,verbose=F)
+boost.boston <- gbm(medv~.,data=Boston[train,],distribution="gaussian",
+                    n.trees=5000,interaction.depth=4,shrinkage=0.2,verbose=F)
+
 yhat.boost <- predict(boost.boston,newdata=Boston[-train,],n.trees=5000)
 mean((yhat.boost-boston.test)^2) # 11.51109
