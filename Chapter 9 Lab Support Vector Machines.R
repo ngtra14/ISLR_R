@@ -5,20 +5,23 @@ http://www-bcf.usc.edu/~gareth/ISL/code.html
 set.seed(1)
 x <- matrix(rnorm(20*2), ncol=2)
 y <- c(rep(-1,10), rep(1,10))
+x
+y
 x[y==1,]=x[y==1,] + 1
 plot(x, col=(3-y))
+
 # build another data frame for these two groups
-dat=data.frame(x=x, y=as.factor(y))
+dat <- data.frame(x=x, y=as.factor(y))
 
 library(e1071)
 svmfit <- svm(y~., data=dat, kernel="linear", cost=10, scale=FALSE)
 plot(svmfit, dat)
 
-svmfit$index
+svmfit$index # support vectors
 summary(svmfit)
 
 # Tune parameter 'cost'
-svmfit <- svm(y~., data=dat, kernel="linear", cost=0.1,scale=FALSE)
+svmfit <- svm(y~., data=dat, kernel="linear", cost=0.1, scale=FALSE)
 plot(svmfit, dat)
 svmfit$index
 
@@ -29,6 +32,7 @@ summary(tune.out)
 bestmod <- tune.out$best.model
 summary(bestmod)
 
+# another example
 xtest <- matrix(rnorm(20*2), ncol=2)
 ytest <- sample(c(-1,1), 20, rep=TRUE)
 xtest[ytest==1,] <- xtest[ytest==1,] + 1
@@ -80,13 +84,15 @@ table(true=dat[-train,"y"], pred=predict(tune.out$best.model,newdata=dat[-train,
 # ROC Curves
 
 library(ROCR)
-rocplot=function(pred, truth, ...){
+rocplot <- function(pred, truth, ...){
   predob = prediction(pred, truth)
   perf = performance(predob, "tpr", "fpr")
   plot(perf,...)}
 
-svmfit.opt <- svm(y~., data=dat[train,], kernel="radial",gamma=2, cost=1,decision.values=T)
-fitted <- attributes(predict(svmfit.opt,dat[train,],decision.values=TRUE))$decision.values
+svmfit.opt <- svm(y~., data=dat[train,], kernel="radial",gamma=2, 
+                  cost=1,decision.values=T)
+fitted <- attributes(predict(svmfit.opt,dat[train,],
+                             decision.values=TRUE))$decision.values
 par(mfrow=c(1,2))
 rocplot(fitted,dat[train,"y"],main="Training Data")
 
