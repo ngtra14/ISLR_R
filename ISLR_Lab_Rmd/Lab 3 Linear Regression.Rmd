@@ -1,0 +1,167 @@
+---
+title: "ISLR 3.6 Linear Regression"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# 3.6 Lab : Linear Regression
+## 3.6.1 Libraries
+```{r}
+library(MASS)
+library(ISLR)
+```
+## 3.6.2 Simple Regression
+```{r}
+# fix(Boston)
+names(Boston)
+```
+```{r}
+lm.fit <- lm(medv ~ lstat, data = Boston)
+lm.fit
+```
+```{r}
+summary(lm.fit)
+```
+```{r}
+names(lm.fit)
+```
+```{r}
+coef(lm.fit)
+```
+
+```{r}
+class(lm.fit)
+```
+```{r}
+confint(lm.fit)
+```
+```{r}
+predict(lm.fit, data.frame(lstat=c(5,10,15)), interval = "confidence")
+```
+```{r}
+predict(lm.fit, data.frame(lstat=c(5,10,15)), interval="prediction")
+```
+```{r}
+with(data = Boston, plot(lstat, medv))
+abline(lm.fit, col="blue")
+```
+```{r}
+with(data = Boston, plot(lstat, medv, pch=20))
+abline(lm.fit, col="blue")
+```
+```{r}
+plot(1:20, 1:20, pch=1:20)
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(lm.fit)
+```
+```{r}
+plot(predict(lm.fit), residuals(lm.fit))
+```
+```{r}
+plot(predict(lm.fit), rstudent(lm.fit))
+```
+```{r}
+plot(hatvalues(lm.fit))
+```
+
+```{r}
+which.max(hatvalues(lm.fit))
+```
+## 3.63 Multiple Linear Regression
+```{r}
+lm.fit2 <- lm(medv~lstat + age, data = Boston)
+summary(lm.fit2)
+```
+```{r}
+lm.fit2 <- lm(medv~., data = Boston)
+summary(lm.fit2)
+```
+```{r}
+summary(lm.fit2)$r.sq
+```
+
+```{r}
+summary(lm.fit2)$sigma  # RSE
+```
+```{r}
+library(car)
+vif(lm.fit2)
+```
+
+```{r}
+lm.fit3 <- lm(medv~. -age, data = Boston)
+summary(lm.fit3)
+```
+
+```{r}
+lm.fit4 <- update(lm.fit2, ~.-age)
+summary(lm.fit4)
+```
+
+## 3.6.4 Interation Terms
+```{r}
+summary(lm(medv ~ lstat*age, data = Boston))
+```
+## 3.6.5 Non-linear Transformations of the Predictors
+```{r}
+lm.fit2 <- lm(medv~lstat + I(lstat^2), data = Boston)
+summary(lm.fit2)
+```
+```{r}
+# anova to demonstrate that the quadratic fit is better than the linear one
+
+lm.fit <- lm(medv ~ lstat, data = Boston)
+anova(lm.fit, lm.fit2)
+```
+```{r}
+par(mfrow=c(2,2))
+plot(lm.fit2)
+```
+
+```{r}
+lm.fit5 <- lm(medv ~ poly(lstat, 5), data = Boston)
+summary(lm.fit5)
+```
+
+```{r}
+with(data = Boston, plot(lstat, medv, pch=20))
+points(Boston$lstat, predict(lm.fit5), col="blue")
+```
+
+```{r}
+summary(lm(medv~log(rm), data = Boston))
+```
+```{r}
+with(data = Boston, plot(rm, medv, pch=20))
+points(Boston$rm, predict(lm(medv~log(rm), data = Boston)), col="blue")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
