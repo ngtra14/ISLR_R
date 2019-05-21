@@ -140,7 +140,45 @@ summary(lm(medv~log(rm), data = Boston))
 with(data = Boston, plot(rm, medv, pch=20))
 points(Boston$rm, predict(lm(medv~log(rm), data = Boston)), col="blue")
 ```
+## 3.66 Quailtative Predictors
+```{r}
+fix(Carseats)
+```
+```{r}
+names(Carseats)
+```
+```{r}
+str(Carseats)
+```
+```{r}
+lm.fit <- lm(Sales~. + Income:Advertising + Price:Age, data=Carseats)
+summary(lm.fit)
+```
+```{r}
+with(data = Carseats, contrasts(ShelveLoc))
+```
+## 3.6.7 Writing functions
+```{r}
+LoadFunctions <- function(){
+  library(ISLR)
+  library(MASS)
+  cat("The Libraries have been loaded.")
+}
+```
+```{r}
+LoadFunctions()
+```
+```{r}
+LoadFunctions2 <- function(){
+  library(ISLR)
+  library(MASS)
+  print("The Libraries have been loaded.")
+}
+```
 
+```{r}
+LoadFunctions2()
+```
 
 
 
