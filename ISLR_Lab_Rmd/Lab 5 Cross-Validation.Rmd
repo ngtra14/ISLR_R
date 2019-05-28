@@ -1,0 +1,85 @@
+---
+title: "5.3 Lab  Cross-Validation and Bootstrap"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## 5.3.1 The validation set approach
+```{r message=FALSE}
+library(ISLR)
+set.seed(1)
+train <- sample(392, 196)
+```
+```{r}
+lm.fit <- lm(mpg ~ horsepower, data = Auto, subset = train)
+```
+
+```{r}
+# caluculate MSE in the validation set
+attach(Auto)
+mean((mpg - predict(lm.fit, Auto))[-train]^2)
+```
+```{r}
+# fit a quadratic model
+lm.fit2 <- lm(mpg ~ poly(horsepower, 2), data=Auto, subset=train)
+
+mean((mpg - predict(lm.fit2, Auto))[-train]^2)
+```
+```{r}
+# fit a cubic model
+lm.fit3 <- lm(mpg ~ poly(horsepower, 3), data=Auto, subset=train)
+
+mean((mpg - predict(lm.fit3, Auto))[-train]^2)
+```
+```{r}
+detach(Auto)
+```
+
+* set different seeds, then to repeat the three model above. the results are slightly different from each other.
+
+## 5.3.2 Leave-One-Out Cross-Validation
+```{r}
+glm.fit <- glm(mpg ~ horsepower, data = Auto)
+coef(glm.fit)
+```
+```{r}
+lm.fit <- lm(mpg ~ horsepower, data = Auto)
+coef(lm.fit)
+```
+The two models above produced same results.
+
+```{r}
+# intro to 'boot' library
+library(boot)
+glm.fit <- glm(mpg ~ horsepower, data = Auto)
+cv.err <- cv.glm(Auto, glm.fit)
+cv.err$delta
+```
+```{r}
+cv.error <- rep(0, 5)
+for (i in 1:5) {
+  glm.fit <- glm(mpg ~ poly(horsepower, i), data = Auto)
+  cv.error[i] <- cv.glm(Auto, glm.fit)$delta[1]
+}
+
+
+```
+```{r}
+plot(cv.error, xlab = 'Order of predictor')
+lines(cv.error)
+```
+## 5.3.3 k-Fold Cross-Validation
+```{r}
+set.seed(17)
+cv.error.10 <- rep(0, 10)
+for (i in 1:10){
+  glm.fit <- glm(mpg ~ poly(horsepower, i), data = Auto)
+  cv.error.10[i] <- cv.glm(Auto, glm.fit, K = 10)$delta[1]
+}
+
+plot(cv.error.10, xlab = 'Order to Predictor')
+lines(cv.error.10)
+```
+
