@@ -1,0 +1,171 @@
+---
+title: "Lab 6 Subset Selection Methods"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## 6.5.1 Best Subset Selection
+```{r}
+library(ISLR)
+names(Hitters)
+# fix(Hitters)
+```
+
+```{r}
+dim(Hitters)
+```
+```{r}
+sum(is.na(Hitters$Salary))
+```
+
+```{r}
+Hitters <- na.omit((Hitters))
+dim(Hitters)
+```
+```{r}
+sum(is.na(Hitters$Salary))
+```
+```{r}
+library(leaps)
+regfit.full <- regsubsets(Salary ~., Hitters)
+summary(regfit.full)
+```
+```{r}
+regfit.full <- regsubsets(Salary ~., Hitters, nvmax = 19)
+reg.summary <- summary(regfit.full)
+```
+```{r}
+names(reg.summary)
+```
+
+```{r}
+reg.summary$rsq
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(reg.summary$rss, xlab = "Number fo Variables", ylab = "RSS", type = "l")
+plot(reg.summary$adjr2, xlab = "Number of Variables", ylab = "Adjusted RSq", type = "l")
+which.max(reg.summary$adjr2)
+points(11, reg.summary$adjr2[11], col='red', cex = 2, pch = 20)
+
+plot(reg.summary$cp, xlab = "Number of Variables", ylab = "Cp")
+which.min(reg.summary$cp)
+points(10, reg.summary$cp[10], col = "red", cex = 2, pch = 20)
+
+which.min(reg.summary$bic)
+plot(reg.summary$bic, xlab = "Number of Variables", ylab = "BIC", type = "l")
+points(6, reg.summary$bic[6], col="red", cex = 2, pch = 20)
+```
+```{r}
+plot(regfit.full, scale = "r2")
+```
+
+```{r}
+plot(regfit.full, scale="adjr2")
+```
+
+```{r}
+plot(regfit.full, scale="Cp")
+```
+```{r}
+plot(regfit.full, scale = "bic")
+```
+
+```{r}
+coef(regfit.full, 6)
+```
+
+## 6.5.2 Forward and Backward Stepwise Selection
+```{r}
+regfit.fwd <- regsubsets(Salary ~., data = Hitters, nvmax = 19, method="forward")
+summary(regfit.fwd)
+```
+```{r}
+regfit.bwd <- regsubsets(Salary ~., data = Hitters, nvmax = 19, method="backward")
+summary(regfit.bwd)
+```
+```{r}
+coef(regfit.full, 7)
+coef(regfit.fwd, 7)
+coef(regfit.bwd, 7)
+```
+## 6.5.3 Choosing among models using the validation set approach and cross-validation
+```{r}
+set.seed(1)
+train <- sample(c(TRUE, FALSE), nrow(Hitters), rep=TRUE)
+test <- (!train)
+```
+```{r}
+regfit.best <- regsubsets(Salary ~., data=Hitters[train, ], nvmax = 19)
+test.mat <- model.matrix(Salary ~., data = Hitters[test, ])
+```
+
+```{r}
+val.errors <- rep(NA, 19)
+for (i in 1:19){
+  coefi = coef(regfit.best, id=i)
+  pred <- test.mat[, names(coefi)]%*%coefi
+  val.errors[i] <- mean((Hitters$Salary[test]-pred)^2)
+}
+```
+
+```{r}
+plot(val.errors, xlab = "Number of Variables")
+lines(val.errors)
+```
+```{r}
+which.min(val.errors)
+```
+```{r}
+coef(regfit.best, 10)
+```
+
+```{r}
+# predict function for regsubsets
+predict.regsubsets <- function(object, newdata, id, ...){
+  form <- as.formula(object$call[[2]])
+  mat <- model.matrix(form, newdata)
+  coefi <- coef(object, id=id)
+  xvars <- names(coefi)
+  mat[, xvars]%*%coefi
+}
+```
+
+```{r}
+regfit.best <- regsubsets(Salary ~., data = Hitters, nvmax = 19)
+coef(regfit.best, 10)
+```
+```{r}
+k <- 10
+set.seed(1)
+folds <- sample(1:k, nrow(Hitters), replace = TRUE)
+cv.errors <- matrix(NA, k, 19, dimnames=list(NULL, paste(1:19)))
+
+```
+
+```{r}
+for (j in 1:k){
+  best.fit <- regsubsets(Salary ~., data = Hitters[folds!=j, ], nvmax = 19)
+  for (i in 1:19){
+    pred <- predict.regsubsets(best.fit, Hitters[folds==j, ], id=i)
+    cv.errors[j, i] = mean((Hitters$Salary[folds=j] - pred)^2)
+  }
+}
+```
+
+```{r}
+mean.cv.errors <- apply(cv.errors, 2, mean)
+mean.cv.errors
+```
+```{r}
+par(mfrow = c(1,1))
+plot(mean.cv.errors, type='b')
+```
+```{r}
+reg.best <- regsubsets(Salary ~., data = Hitters, nvmax = 19)
+coef(reg.best, 11)
+```
+Need to revisit the results and the function defined for the predict.regsubsets.
