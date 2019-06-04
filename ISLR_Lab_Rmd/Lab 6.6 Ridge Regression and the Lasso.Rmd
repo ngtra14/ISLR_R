@@ -1,0 +1,135 @@
+---
+title: "Lab 6.6 Ridge Regression and the Lasso"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### 6.6 Lab 2: Ridge Regression and the Lasso
+```{r}
+library(ISLR)
+library(glmnet)
+```
+```{r}
+head(Hitters)
+```
+```{r}
+Hitters <- na.omit(Hitters)
+```
+```{r}
+x <- model.matrix(Salary~., Hitters)[, -1]
+y <- Hitters$Salary
+```
+#### 6.6.1 Ridge Regression
+```{r}
+grid <- 10^seq(10, -2, length=100)
+ridge.mod <- glmnet(x, y, alpha = 0, lambda = grid)
+```
+```{r}
+dim(coef(ridge.mod))
+```
+```{r}
+ridge.mod$lambda[50]
+```
+```{r}
+coef(ridge.mod)[, 50]
+```
+
+```{r}
+sqrt(sum(coef(ridge.mod)[-1, 50]^2))
+```
+```{r}
+ridge.mod$lambda[60]
+```
+```{r}
+coef(ridge.mod)[, 60]
+```
+
+```{r}
+sqrt(sum(coef(ridge.mod)[-1, 60]^2))
+```
+
+```{r}
+predict(ridge.mod, s=50, type="coefficients")[1:20, ]
+```
+```{r}
+set.seed(1)
+train <- sample(1:nrow(x), nrow(x)/2)
+test <- (-train)
+y.test <- y[test]
+```
+```{r}
+ridge.mod <- glmnet(x[train, ], y[train], alpha = 0, lambda = grid, thresh = 1e-12)
+ridge.pred <- predict(ridge.mod, s=4, newx = x[test, ])
+mean((ridge.pred - y.test)^2)
+```
+```{r}
+# baseline MSE estimate
+mean((mean(y[train])-y.test)^2)
+```
+
+```{r}
+# fit ridge model with large lambda values
+ridge.pred <- predict(ridge.mod, s=1e10, newx = x[test, ])
+mean((ridge.pred - y.test)^2)
+```
+
+```{r}
+ridge.pred <- predict(ridge.mod, s=0, newx = x[test, ])
+mean((ridge.pred - y.test)^2)
+```
+
+```{r}
+lm(y ~ x, subset=train)
+```
+
+```{r}
+predict(ridge.mod, s=0, type="coefficients")[1:20,]
+```
+```{r}
+set.seed(1)
+cv.out <- cv.glmnet(x[train,], y[train], alpha = 0)
+plot(cv.out)
+```
+```{r}
+bestlam <- cv.out$lambda.min
+bestlam
+```
+
+```{r}
+ridge.pred <- predict(ridge.mod, s=bestlam, newx = x[test, ])
+mean((ridge.pred - y.test)^2)
+```
+
+```{r}
+out <- glmnet(x, y, alpha = 0)
+predict(out, type="coefficients", s=bestlam)[1:20, ]
+```
+#### 6.6.2 The Lasso
+```{r}
+lasso.mod <- glmnet(x, y, alpha = 1, lambda = grid)
+plot(lasso.mod)
+```
+```{r}
+set.seed(1)
+cv.out <- cv.glmnet(x[train,], y[train], alpha = 1)
+plot(cv.out)
+```
+```{r}
+bestlam <- cv.out$lambda.min
+bestlam
+```
+```{r}
+lasso.pred <- predict(lasso.mod, s=bestlam, newx = x[test, ])
+mean((lasso.pred - y.test)^2)
+```
+```{r}
+out <- glmnet(x, y, alpha = 1)
+lasso.coef <- predict(out, type="coefficients", s=bestlam)[1:20, ]
+lasso.coef
+```
+```{r}
+lasso.coef[lasso.coef!=0]
+```
+
