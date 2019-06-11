@@ -1,0 +1,66 @@
+---
+title: "Lab 10.4 Principal Components Analysis"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(ISLR)
+```
+```{r}
+states <- row.names(USArrests)
+states
+```
+```{r}
+names(USArrests)
+```
+```{r}
+apply(USArrests, 2, mean)
+```
+```{r}
+apply(USArrests, 2, var)
+```
+```{r}
+pr.out <- prcomp(USArrests, scale=TRUE)
+names(pr.out)
+```
+```{r}
+pr.out$center
+```
+```{r}
+pr.out$scale
+```
+```{r}
+pr.out$rotation
+```
+```{r}
+dim(pr.out$x)
+```
+```{r}
+biplot(pr.out, scale=0)
+```
+```{r}
+pr.out$rotation <- -pr.out$rotation
+pr.out$x <- -pr.out$x
+biplot(pr.out, scale=0)
+```
+```{r}
+pr.out$sdev
+```
+```{r}
+pr.var <- pr.out$sdev^2
+pve <- pr.var/sum(pr.var)
+pve
+```
+```{r}
+par(mfrow=c(1, 2))
+
+plot(pve, xlab = "Principal component", ylab = "Proportion of Variance Explained", 
+     ylim = c(0,1), type = 'b')
+
+plot(cumsum(pve), xlab = "Principal component", ylab = "Cumulative Proportion of Variance Explained", 
+     ylim = c(0,1), type = 'b')
+```
+
