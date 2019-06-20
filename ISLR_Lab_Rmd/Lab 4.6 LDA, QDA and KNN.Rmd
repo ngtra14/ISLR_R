@@ -1,0 +1,153 @@
+---
+title: "Lab 4.6 Logistic regression, LDA, QDA and KNN"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## 4.6.3 Linear discriminant analysis
+```{r}
+library(ISLR)
+library(MASS)
+```
+```{r}
+train <- (Smarket$Year < 2005)
+Smarket.2005 <- Smarket[!train, ]
+Direction.2005 <- Smarket$Direction[!train]
+```
+
+
+```{r}
+lda.fit <- lda(Direction ~ Lag1 + Lag2, data = Smarket, subset = train)
+lda.fit
+```
+```{r}
+plot(lda.fit)
+```
+
+```{r}
+lda.pred <- predict(lda.fit, Smarket.2005)
+names(lda.pred)
+```
+```{r}
+lda.class <- lda.pred$class
+table(lda.class, Direction.2005)
+```
+```{r}
+mean(lda.class==Direction.2005)
+```
+```{r}
+sum(lda.pred$posterior[,1 ]>=0.5)
+```
+```{r}
+sum(lda.pred$posterior[,1 ]<0.5)
+```
+```{r}
+lda.pred$posterior[1:20, 1]
+```
+```{r}
+lda.class[1:20]
+```
+```{r}
+sum(lda.pred$posterior[,1] > 0.9)
+```
+## 4.6.4 Quadratic discriminant analysis
+```{r}
+qda.fit <- qda(Direction ~ Lag1 + Lag2, data = Smarket, subset = train)
+qda.fit
+```
+```{r}
+qda.class <- predict(qda.fit, Smarket.2005)$class
+table(qda.class, Direction.2005)
+```
+```{r}
+mean(qda.class==Direction.2005)
+```
+
+## 4.6.5 K-Nearest Neighbors
+```{r}
+library(class)
+attach(Smarket)
+train.X <- cbind(Lag1 , Lag2)[train, ]
+
+
+test.X <- cbind(Lag1 , Lag2)[!train, ]
+
+train.Direction <- Direction[train]
+
+detach(Smarket)
+```
+```{r}
+set.seed(1)
+knn.pred <- knn(train.X, test.X, train.Direction, k=1)
+table(knn.pred, Direction.2005)
+```
+```{r}
+knn.pred <- knn(train.X, test.X, train.Direction, k=3)
+table(knn.pred, Direction.2005)
+```
+```{r}
+mean(knn.pred==Direction.2005)
+```
+
+## 4.66 An application to Caravan insurance data
+```{r}
+dim(Caravan)
+```
+```{r}
+attach(Caravan)
+summary(Purchase)
+```
+```{r}
+standardized.X <- scale(Caravan[, -86])
+var(standardized.X[, 1])
+```
+```{r}
+test <- 1:1000
+train.X <- standardized.X[-test, ]
+test.X <- standardized.X[test, ]
+train.Y <- Purchase[-test]
+test.Y <- Purchase[test]
+```
+
+```{r}
+set.seed(1)
+knn.pred <- knn(train.X, test.X, train.Y, k=1)
+mean(test.Y!=knn.pred)
+```
+```{r}
+mean(test.Y!="No")
+```
+```{r}
+table(knn.pred, test.Y)
+```
+```{r}
+knn.pred <- knn(train.X, test.X, train.Y, k=3)
+mean(test.Y!=knn.pred)
+```
+```{r}
+knn.pred <- knn(train.X, test.X, train.Y, k=5)
+table(knn.pred, test.Y)
+```
+```{r}
+4/(11 + 4)
+```
+### logistic regression
+```{r}
+glm.fit <- glm(Purchase ~. , data = Caravan, family = binomial, subset = -test)
+
+glm.probs <- predict(glm.fit, Caravan[test, ], type="response")
+glm.pred <- rep("No", 1000)
+glm.pred[glm.probs > 0.5] = "Yes"
+table(glm.pred, test.Y)
+```
+```{r}
+glm.pred <- rep("No", 1000)
+glm.pred[glm.probs > 0.25] = "Yes"
+table(glm.pred, test.Y)
+```
+```{r}
+11/(22 + 11)
+```
+
