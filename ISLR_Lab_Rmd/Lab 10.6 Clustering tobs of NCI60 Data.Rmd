@@ -1,0 +1,67 @@
+---
+title: "Lab 10.6 Clustering tobs of NCI60 Data"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Lab 10.6.2 Clustering tobs of NCI60 Data
+```{r}
+library(ISLR)
+str(NCI60)
+```
+```{r}
+# preppare the data
+nci.labs <- NCI60$labs
+nci.data <- NCI60$data
+sd.data <- scale(nci.data)
+```
+```{r}
+# performance clustering
+par(mfrow = c(1, 3))
+data.dist <- dist(sd.data)
+plot(hclust(data.dist), labels=nci.labs, main = "Complete", xlab = "", sub = "", ylab = "")
+plot(hclust(data.dist, method = "average"), labels=nci.labs, main = "Average", xlab = "", sub = "", ylab = "")
+plot(hclust(data.dist, method = "single"), labels=nci.labs, main = "Single", xlab = "", sub = "", ylab = "")
+```
+```{r}
+table(nci.labs)
+```
+```{r}
+# show labs distribution
+plot(table(nci.labs))
+```
+```{r}
+# compare clusters with labels
+hc.out <- hclust(dist(sd.data))
+hc.clusters <- cutree(hc.out, 4)
+table(hc.clusters, nci.labs)
+```
+```{r}
+plot(hc.out, labels = nci.labs)
+abline(h = 139, col = "red")
+```
+```{r}
+hc.out
+```
+```{r}
+# compare with K-means
+set.seed(2)
+km.out <- kmeans(sd.data, 4, nstart = 20)
+km.clusters <- km.out$cluster
+table(km.clusters, hc.clusters)
+```
+```{r}
+# preprocessing with principle component
+pr.out <- prcomp(nci.data, scale=TRUE)
+hc.out <- hclust(dist(pr.out$x[, 1:5]))
+
+plot(hc.out, labels=nci.labs, main = "PCA + HClust", xlab = "", sub = "", ylab = "")
+```
+```{r}
+# is it better than that without PCA ?
+table(cutree(hc.out, 4), nci.labs)
+```
+
