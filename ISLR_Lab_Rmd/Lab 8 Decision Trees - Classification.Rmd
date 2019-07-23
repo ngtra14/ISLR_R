@@ -1,0 +1,92 @@
+---
+title: "Lab 8 Decision Trees"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## 8.3.1 Fitting classification trees
+```{r}
+library(tree)
+library(ISLR)
+```
+```{r}
+# creat factor High
+attach(Carseats)
+High <- ifelse(Sales <= 8, "No", "Yes")
+Carseats <- data.frame(Carseats, High)
+```
+```{r}
+# fit tree model
+tree.carseats <- tree(High~. -Sales, Carseats)
+summary(tree.carseats)
+```
+
+```{r}
+# display the tree
+plot(tree.carseats)
+text(tree.carseats, pretty = 0)
+```
+```{r}
+# print out trees
+tree.carseats
+```
+```{r}
+# make predictions
+set.seed(2)
+train <- sample(1:nrow(Carseats), 200)
+Carseats.test <- Carseats[-train, ]
+High.test <- High[-train]
+tree.carseats <- tree(High~. -Sales, Carseats, subset = train)
+tree.pred <- predict(tree.carseats, Carseats.test, type = "class")
+table(tree.pred, High.test)
+```
+```{r}
+# accuracy
+(86 + 57)/200
+```
+## Prune the trees
+```{r}
+set.seed(3)
+cv.carseats <- cv.tree(tree.carseats, FUN = prune.misclass)
+names(cv.carseats)
+```
+```{r}
+cv.carseats
+```
+```{r}
+par(mfrow = c(1, 2))
+plot(cv.carseats$size, cv.carseats$dev, type = "b")
+plot(cv.carseats$k, cv.carseats$dev, type = "b")
+```
+```{r}
+# prune.misclass
+prune.carseats <- prune.misclass(tree.carseats, best = 9)
+plot(prune.carseats)
+text(prune.carseats, pretty = 0)
+```
+```{r}
+# more predictions
+tree.pred <- predict(prune.carseats, Carseats.test, type = "class")
+table(tree.pred, High.test)
+```
+```{r}
+# accuracy
+(94 + 60)/200
+```
+```{r}
+# increase tree number
+prune.carseats <- prune.misclass(tree.carseats, best = 15)
+tree.pred <- predict(prune.carseats, Carseats.test, type = "class")
+table(tree.pred, High.test)
+```
+```{r}
+# accuracy
+(86 + 62)/200
+```
+```{r}
+detach(Carseats)
+```
+
+
