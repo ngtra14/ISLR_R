@@ -1,0 +1,107 @@
+---
+title: "Lab 8 Decision Trees"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## 8.3.2 Fitting regression trees
+```{r}
+library(MASS)
+library(tree)
+library(ISLR)
+```
+```{r}
+# Boston data set
+set.seed(1)
+train <- sample(1:nrow(Boston), nrow(Boston)/2)
+tree.boston <- tree(medv~., Boston, subset = train)
+summary(tree.boston)
+```
+```{r}
+plot(tree.boston)
+text(tree.boston, pretty = 0)
+```
+```{r}
+cv.boston <- cv.tree(tree.boston)
+plot(cv.boston$size, cv.boston$dev, type = "b")
+```
+```{r}
+# prune the tree
+prune.boston <- prune.tree(tree.boston, best = 5)
+plot(prune.boston)
+text(prune.boston, pretty = 0)
+```
+```{r}
+# prediction
+yhat <- predict(tree.boston, newdata = Boston[-train, ])
+boston.test <- Boston[-train, "medv"]
+plot(yhat, boston.test)
+abline(0, 1)
+mean((yhat - boston.test)^2)
+```
+
+## 8.3.3 Bagging and random forests
+```{r}
+# random forest
+library(randomForest)
+set.seed(1)
+bag.boston <- randomForest(medv~., data = Boston, subset = train, mtry = 13, importance = TRUE)
+bag.boston
+```
+```{r}
+# prediction on test set
+yhat.bag <- predict(bag.boston, newdata = Boston[-train, ])
+plot(yhat.bag, boston.test)
+abline(0, 1)
+mean((yhat.bag-boston.test)^2)
+```
+
+```{r}
+# change number of trees
+bag.boston <- randomForest(medv~., data = Boston, subset = train, mtry = 13, importance = TRUE, ntree = 25)
+
+yhat.bag <- predict(bag.boston, newdata = Boston[-train, ])
+mean((yhat.bag-boston.test)^2)
+```
+```{r}
+# change of number of predictors
+# change number of trees
+rf.boston <- randomForest(medv~., data = Boston, subset = train, mtry = 6, importance = TRUE)
+
+yhat.bag <- predict(rf.boston, newdata = Boston[-train, ])
+mean((yhat.bag-boston.test)^2)
+```
+```{r}
+# importance
+importance(rf.boston)
+```
+```{r}
+varImpPlot(rf.boston)
+```
+
+## 8.3.4 Boosting
+```{r}
+library(gbm)
+set.seed(1)
+boost.boston <- gbm(medv~., data = Boston[train, ], distribution = "gaussian", n.trees = 5000, interaction.depth = 4)
+summary(boost.boston)
+```
+```{r}
+par(mfrow = c(1, 2))
+plot(boost.boston, i = "rm")
+plot(boost.boston, i = "lstat")
+```
+```{r}
+# predictions
+yhat.boost <- predict(boost.boston, newdata = Boston[-train, ], n.trees = 5000)
+mean((yhat.boost-boston.test)^2)
+```
+```{r}
+# shrinkage parameter
+boost.boston <- gbm(medv~., data = Boston[train, ], distribution = "gaussian", n.trees = 5000, interaction.depth = 4, shrinkage = 0.2, verbose = F)
+yhat.boost <- predict(boost.boston, newdata = Boston[-train, ], n.trees = 5000)
+mean((yhat.boost-boston.test)^2)
+```
+
