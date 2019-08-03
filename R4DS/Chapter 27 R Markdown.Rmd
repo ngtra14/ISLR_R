@@ -1,0 +1,64 @@
+---
+title: "Chapter 27 R Markdown"
+output: html_document
+params:
+  my_class: "suv"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+class <- mpg %>% filter(class == params$my_class)
+
+
+smaller <- diamonds %>% 
+  filter(carat <= 2.5)
+```
+We have data about `r nrow(diamonds)` diamonds. Only 
+`r nrow(diamonds) - nrow(smaller)` are larger than
+2.5 carats. The distribution of the remainder is shown
+below:
+
+```{r plot, echo = FALSE}
+smaller %>% 
+  ggplot(aes(carat)) + 
+  geom_freqpoly(binwidth = 0.01)
+```
+
+## text formatting with markdown
+### table
+```{r}
+mtcars[1:5, ]
+```
+```{r}
+knitr::kable(
+  mtcars[1:5, ],
+  caption = "A knitr kable"
+)
+```
+### caching
+{r processed_data, cache = TRUE, dependson = "raw_data"}
+
+### global options
+### inline code
+```{r}
+comma <- function(x) format(x, digits = 2, big.mark = ",")
+comma(3452345)
+comma(0.12345678)
+```
+## trouble shooting
+*The most common difference is the working directory: the working directory of an R Markdown is the directory in which it lives. Check the working directory is what you expect by including getwd() in a chunk.*
+
+## YAML header
+### parameters
+
+Fuel economy for `r params$my_class`s
+
+```{r, message = FALSE}
+ggplot(class, aes(displ, hwy)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+```
+### bibliographies and citations
+
