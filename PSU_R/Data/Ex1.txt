@@ -1,0 +1,1 @@
+MeanDM	DMn	Jday	DMse# mean biomass	sample n	day of year	SE of biomass380	8	117	28.663674.25	8	137	31.262590	8	128	27.664834	8	149	46.363673.25	8	137	32.033984	8	155	71.014
