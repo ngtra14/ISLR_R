@@ -50,3 +50,8 @@ mcf
 abline(a = mcf[1], b = mcf[2])
 abline(a = mcf[1] + mcf[3], b = mcf[2] + mcf[4], col="red")
 
+
+# 13.5 - A Note About Sums of Square in R  --------------------------------
+
+# F-test - Type I SS by default - sequential - order based
+
