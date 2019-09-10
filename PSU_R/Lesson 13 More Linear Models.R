@@ -55,3 +55,16 @@ abline(a = mcf[1] + mcf[3], b = mcf[2] + mcf[4], col="red")
 
 # F-test - Type I SS by default - sequential - order based
 
+
+# 13.6 - Resistant Regression ---------------------------------------------
+library(MASS)
+data("mtcars")
+boxplot(hp ~ cyl, data = mtcars)
+summary(lm(hp ~ factor(cyl), data = mtcars))
+op <- par(mfrow=c(2, 2))
+plot(lm(hp ~ factor(cyl), data = mtcars))
+
+# resistant linear model
+summary(rlm(hp ~ factor(cyl), data = mtcars))
+## no p-values anymore
+plot(lm(hp ~ factor(cyl), data = mtcars))
