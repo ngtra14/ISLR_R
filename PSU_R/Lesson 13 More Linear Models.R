@@ -68,3 +68,44 @@ plot(lm(hp ~ factor(cyl), data = mtcars))
 summary(rlm(hp ~ factor(cyl), data = mtcars))
 ## no p-values anymore
 plot(lm(hp ~ factor(cyl), data = mtcars))
+
+
+# 13.7 - Specifying Contrasts ---------------------------------------------
+
+data("warpbreaks")
+unique(warpbreaks[, 2:3])
+summary(lm(breaks ~ wool*tension, data = warpbreaks))$coef
+aggregate(warpbreaks$breaks, by=warpbreaks[, 2:3], mean)
+
+m1 <- (lm(breaks~wool*tension, data = warpbreaks))
+summary(m1)$coef
+# AL = c(1,0,0,0,0,0)
+# BL = c(1,1,0,0,0,0)
+sum(summary(m1)$coef[,1]*c(0,-1,0,0,0,-1))
+
+cont.mat <- matrix(c(0,-1,0,0,0,0, 0,-1,0,0,-1,0,0,-1,0,0,0,-1), 
+                   byrow = TRUE, nrow = 3)
+cont.mat
+
+# multcomp
+library(multcomp)
+tests <- glht(m1, linfct=cont.mat)
+summary(tests)
+
+## need to read the tutorial again
+
+
+# 13.8 - More Complex Designs  --------------------------------------------
+# example of a split-plot design
+Rye <- read.csv("Data/RyeSplitPlot.csv", comm="#")
+head(Rye)
+
+# wrong model
+summary(aov(RyeDM ~ Rep + Plant + Tdate, data = Rye))
+
+# split-plot model
+summary(aov(RyeDM ~ Rep + Plant + Tdate + Error(Rep/Plant), data = Rye))
+# plant not significant
+# Tdate significant
+# Plant is nested in Rep
+
