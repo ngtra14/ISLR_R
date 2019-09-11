@@ -1,0 +1,41 @@
+---
+title: "md-demo1"
+author: "Eric Nord"
+date: "3/26/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# this is just a place to specify global document options, and can be omitted - no need to edit this unless you are changing formatting.
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Analysis of my data
+
+#### about the data
+
+
+#### goal
+Notice the above three lines are different levels of headings.
+
+```{r}
+eb <- read.delim("~/DataAnalysis_H/Examples_R/PSU_R/Data/electric bill.txt")
+
+summary(eb)
+```
+
+This data looks OK.
+
+```{r make-plot,echo=FALSE}
+plot(kwh~avgT,data=eb)
+```
+
+
+Regression model of usage as a function of temp....
+
+```{r}
+m1<-lm(kwh ~ avgT, data = eb)
+summary(m1)$coeff
+```
+
+The fit is OK - the R^2^ is `r signif(summary(m1)$adj.r.squared,4)`.  
+The above value is dynamically linked to the data, so if I change the data or the model, the R^2^ value will change also.
