@@ -1,0 +1,88 @@
+---
+title: "template_R_Python_reticulate"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries
+```{r message=FALSE}
+libs <- c('dplyr', 'tidyr', 'stringr',  # wrangling
+          'knitr','kableExtra',         # table styling
+          'ggplot2','gridExtra',        # plots
+          'viridis',                    # visuals styling
+          'reticulate')                 # e pluribus unum
+invisible(lapply(libs, library, character.only = TRUE))
+```
+## Iris dataset
+```{r}
+iris %>% count(Species)
+```
+## EDA in ggplot2
+```{r}
+p1 <- iris %>%
+  ggplot(aes(Petal.Length, Petal.Width, color = Species)) +
+  geom_point(size = 4) +
+  labs(x = "Petal Length", y = "Petal Width") +
+  scale_color_viridis(discrete = TRUE, option = "viridis") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  ggtitle("Differences in Iris Species",
+          subtitle = str_c("Petal and Sepal dimensions vary",
+                           "\n",
+                           "significantly between species"))
+
+p2 <- iris %>%
+  ggplot(aes(Sepal.Length, Sepal.Width, color = Species)) +
+  geom_point(size = 4) +
+  labs(x = "Sepal Length", y = "Sepal Width") +
+  scale_color_viridis(discrete = TRUE, option = "viridis") +
+  theme_bw() +
+  theme(legend.position = "top")
+
+grid.arrange(p1, p2, layout_matrix = rbind(c(1,2)))
+```
+
+## Classification by scikit-learn in Python
+```{r}
+library(reticulate)
+use_python("C:/Users/AppData/Local/Programs/Python/Python37-32/python")
+```
+```{python}
+foo = [1, 2, 3]
+print(foo[0])
+
+```
+```{r}
+data(iris)
+head(iris)
+autos <- cars
+```
+```{python}
+import pandas as pd
+autos_py = r.autos
+autos_py.head()
+```
+
+
+```{python}
+print(r.iris.loc[:5, ["Sepal.Length", "Species"]])
+```
+```{python}
+import pandas
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+```
+```{r}
+train, test = train_test_split(r.iris,
+                test_size = 0.4, random_state = 4321)
+
+X = train.drop('Species', axis = 1)
+y = train.loc[:, 'Species'].values
+X_test = test.drop('Species', axis = 1)
+y_test = test.loc[:, 'Species'].values
+```
+* https://www.r-bloggers.com/the-best-of-both-worlds-r-meets-python-via-reticulate/
+Again, not working
