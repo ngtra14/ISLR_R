@@ -124,3 +124,56 @@ local({
 mlr_measures
 measure = msr("classif.acc")
 prediction$score(measure)
+
+
+# resampling --------------------------------------------------------------
+
+task = tsk("iris")
+learner = lrn("classif.rpart")
+mlr_resamplings
+resampling = rsmp("holdout")
+print(resampling)
+
+resampling$param_set$values = list(ratio = 0.8)
+rsmp("holdout", ratio = 0.8)
+
+# instantiation
+reampling = rsmp("cv", folds = 3L)
+resampling$instantiate(task)
+resampling$iters
+
+str(resampling$train_set(1))
+str(resampling$test_set(1))
+
+# execution
+task = tsk("pima")
+learner = lrn("classif.rpart", 
+              maxdepth = 3,
+              predict_type = "prob")
+
+resampling = rsmp("cv", folds = 3L)
+rr = resample(task, learner, resampling, store_models = TRUE)
+print(rr)
+
+rr$aggregate(msr("classif.ce")) # check performance
+
+rr$score(msr("classif.ce"))
+
+rr$warnings
+
+lrn = rr$learners[[1]]
+lrn$model
+
+rr$prediction()
+
+# custom resampling
+# plotting
+library(mlr3viz)
+resampling = rsmp("custom")
+resampling$instantiate(task,
+                       train = list(c(1:100, 51:60, 101:110)),
+                       test = list(c(11:20, 61:70, 111:120)))
+
+
+autoplot(rr)
+autoplot(rr, type = "roc") # not working
