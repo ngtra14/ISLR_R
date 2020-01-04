@@ -177,3 +177,47 @@ resampling$instantiate(task,
 
 autoplot(rr)
 autoplot(rr, type = "roc") # not working
+
+
+# 2.6 benchmarking --------------------------------------------------------
+
+library(data.table)
+
+design = benchmark_grid(
+  tasks = tsk("iris"),
+  learner = list(lrn("classif.rpart"), lrn("classif.featureless")),
+  resamplings = rsmp("holdout")
+)
+
+print(design)
+bmr = benchmark(design)
+
+# more examples
+tasks = lapply(c("german_credit", "sonar"), tsk)
+library(mlr3learners)
+learners = c("classif.featureless", "classif.rpart", "classif.ranger", 
+             "classif.kknn")
+learners = lapply(learners, lrn, 
+                  predict_type = "prob",
+                  predict_sets = c("train", "test"))
+
+resamplings = rsmp("cv", folds = 3L)
+
+design = benchmark_grid(tasks, learners, resamplings)
+print(design)
+
+# run and summarize results
+bmr = benchmark(design) # where it went wrong
+measures = list(
+  msr("classif.auc", id = "auc_train", predict_sets = "train"),
+  msr("classif.auc", id = "auc_test")
+)
+
+bmr$aggregate(measures) # not working !
+
+tab = bmr$aggregate(measures)
+
+# plotting results
+library(ggplot2)
+autoplot(bmr) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
