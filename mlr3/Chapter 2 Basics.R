@@ -66,3 +66,61 @@ learner$param_set$values = mlr3misc::insert_named(
 
 learner
 lrn("classif.rpart", id = "rp", cp = 0.01)    
+
+
+# train and predict -------------------------------------------------------
+
+task = tsk("sonar")
+# head(sonar)
+# head(as.data.table(sonar))
+learner = lrn("classif.rpart")
+train_set = sample(task$nrow, 0.8 * task$nrow)
+test_set = setdiff(seq_len(task$nrow), train_set)
+
+learner$model
+learner$train(task, row_ids = train_set)
+
+print(learner$model)
+
+prediction = learner$predict(task, row_ids = test_set)
+print(prediction)
+
+head(as.data.table(prediction))
+
+# confusion matrix
+prediction$confusion
+
+# change the predition type
+learner$predict_type = "prob"
+learner$train(task, row_ids = train_set)
+prediction = learner$predict(task, row_ids = test_set)
+
+head(as.data.table(prediction))
+
+head(prediction$response)
+head(prediction$prob)
+
+# not on Cran
+# remotes::install_github("mlr-org/mlr3viz")
+library(mlr3viz)
+
+task = tsk("sonar")
+learner = lrn("classif.rpart", predict_type = "prob")
+learner$train(task)
+predition = learner$predict(task)
+autoplot(prediction)
+autoplot(prediction, type = "roc")
+
+library(mlr3learners)
+local({
+  task = tsk("mtcars")
+  learner = lrn("regr.lm")
+  learner$train(task)
+  prediction = learner$predict(task)
+  autoplot(prediction)
+})
+
+# performance evaluation
+mlr_measures
+measure = msr("classif.acc")
+prediction$score(measure)
