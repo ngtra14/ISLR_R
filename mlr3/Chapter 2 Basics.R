@@ -221,3 +221,22 @@ tab = bmr$aggregate(measures)
 library(ggplot2)
 autoplot(bmr) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# binary classification ---------------------------------------------------
+
+data("Sonar", package = "mlbench")
+task = TaskClassif$new(id = "Sonar", Sonar, target = "Class", positive = "R")
+head(Sonar)
+
+task$positive = "M"
+learner = lrn("classif.rpart", predict_type = "prob")
+pred = learner$train(task)$predict(task)
+C = pred$confusion
+print(C)
+
+ggplot2::autoplot(pred, type = "roc")
+ggplot2::autoplot(pred, type = "prc")
+
+# Error in errorCondition(msg, packages = pkgs[ii], class = "packageNotFoundError") : 
+# could not find function "errorCondition"
