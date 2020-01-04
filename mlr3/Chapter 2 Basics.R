@@ -47,3 +47,22 @@ print(task_mtcars$col_roles)
 data = as.data.table(mtcars[, 1:3], keep.rownames = TRUE)
 task = TaskRegr$new(id = "cars", backend = data, target = "mpg")
 task$row_ids
+
+
+# 2.3 learners ------------------------------------------------------------
+
+library(mlr3learners)
+mlr_learners
+learner = mlr_learners$get("classif.rpart")
+print(learner)
+
+learner$param_set
+learner$param_set$values = list(cp = 0.01, xval = 0)
+learner
+
+learner$param_set$values = mlr3misc::insert_named(
+  learner$param_set$values,
+  list(cp = 0.02, minsplit = 2))  
+
+learner
+lrn("classif.rpart", id = "rp", cp = 0.01)    
