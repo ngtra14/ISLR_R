@@ -55,6 +55,16 @@ rf_concrete <- randomForest(strength ~ ., data = concrete, subset = train,
 rf_concrete
 varImpPlot(rf_concrete, type = 1)
 
+# boosting
+library(gbm)
+set.seed(1)
+bt_concrete <- gbm(strength ~., data = concrete[train, ], 
+                   distribution = "gaussian",
+                   n.trees = 5000,
+                   interaction.depth = 4)
+
+summary(bt_concrete)
+
 # prediction on the test data
 yhat_rf <- predict(rf_concrete, newdata = concrete[-train, ])
 mean((yhat_rf - concrete[-train, ]$strength)^2) # 15.45983
@@ -65,17 +75,9 @@ mean((yhat_tr - concrete[-train, ]$strength)^2) # 68.22335
 yhat_lm <- predict(lm_concrete, newdata = concrete[-train, ])
 mean((yhat_lm - concrete[-train, ]$strength)^2) # 122.109
 
-
-
-plot(yhat_lm, concrete[-train, ]$strength, col = "blue")
-points(yhat_rf, concrete[-train, ]$strength, col = "red")
-points(yhat_tr, concrete[-train, ]$strength, col = "green")
-abline(0, 1)
-legend("topleft", col = c("blue", "red", "green"), 
-                  lty = c(1, 1, 1),
-                  legend = c("lm", "rf", "tr"))
-
-
+yhat_bt <- predict(bt_concrete, newdata = concrete[-train, ], 
+                   n.trees = 5000)
+mean((yhat_bt - concrete[-train, ]$strength)^2) # 29.23619
 
 # use Keras in Regression model -------------------------------------------
 # prepare the data format for nuerual net work
@@ -103,10 +105,6 @@ train_data[1, ]
 test_data[1, ]
 
 # construct neural network
-# Because we will need to instantiate the same model multiple times,
-# we use a function to construct it.
-
-
 model <- keras_model_sequential() %>% 
     layer_dense(units = 64, activation = "relu", 
                 input_shape = dim(train_data)[[2]]) %>% 
@@ -131,3 +129,14 @@ results
 yhat_tf <- model %>% predict(test_data)
 mean((yhat_tf - concrete[-train, ]$strength)^2) # 130.5116/23.55472
 mean((yhat_tf - test_target)^2) # 23.55472
+
+# plot for comparison -----------------------------------------------------
+plot(yhat_lm, concrete[-train, ]$strength, col = "blue")
+points(yhat_rf, concrete[-train, ]$strength, col = "red")
+points(yhat_tr, concrete[-train, ]$strength, col = "green")
+points(yhat_bt, concrete[-train, ]$strength, col = "yellow")
+points(yhat_tf, concrete[-train, ]$strength, col = "black")
+abline(0, 1)
+legend("topleft", col = c("blue", "red", "green", "yellow", "black"), 
+       lty = c(1, 1, 1),
+       legend = c("lm", "rf", "tr", "bt", "tf"))
