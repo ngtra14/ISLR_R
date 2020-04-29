@@ -30,7 +30,7 @@ logReg <- glm(Class ~. , data = training, family = "binomial")
 # Prediction and performance ----------------------------------------------
 
 prob <- predict(logReg, testing, type = "response")
-pred <- ifelse(prob > 0.5, "R", "M")
+pred <- ifelse(prob > 0.5, "M", "R")
 table(testing$Class, pred)
 confusionMatrix(testing$Class, as.factor(pred))
 
