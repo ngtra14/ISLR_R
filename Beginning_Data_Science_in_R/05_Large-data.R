@@ -78,13 +78,13 @@ suppressPackageStartupMessages(library(ffbase, quietly = TRUE))
 model <- bigglm(dist ~ speed, data = ffcars)
 summary(model)
 
-library(RSQLite)
-## ------------------------------------------------------------------------
-iris_db <- src_sqlite("iris_db.sqlite3", create = TRUE)
-
-## ------------------------------------------------------------------------
-iris_sqlite <- tbl(iris_db, 'iris')
-
-## ------------------------------------------------------------------------
-iris_sqlite %>% group_by(Species) %>%
-  summarise(mean.Petal.Length = mean(Petal.Length))
+# library(RSQLite)
+# ## ------------------------------------------------------------------------
+# iris_db <- src_sqlite("iris_db.sqlite3", create = TRUE)
+# 
+# ## ------------------------------------------------------------------------
+# iris_sqlite <- tbl(iris_db, 'iris')
+# 
+# ## ------------------------------------------------------------------------
+# iris_sqlite %>% group_by(Species) %>%
+#   summarise(mean.Petal.Length = mean(Petal.Length))
