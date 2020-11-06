@@ -35,8 +35,52 @@ plsFit <- train(Class ~.,
 
 plsFit
 
+
+# tuning parameter --------------------------------------------------------
+
+plsFit <- train(
+  Class ~ .,
+  data = training,
+  method = "pls",
+  preProc = c("center", "scale"),
+  ## added:
+  tuneLength = 15
+)
+
+ctrl <- trainControl(method = "repeatedcv", repeats = 3)
+
+plsFit <- train(
+  Class ~ .,
+  data = training,
+  method = "pls",
+  preProc = c("center", "scale"),
+  tuneLength = 15,
+  ## added:
+  trControl = ctrl
+)
+
+ctrl <- trainControl(
+  method = "repeatedcv", 
+  repeats = 3,
+  classProbs = TRUE, 
+  summaryFunction = twoClassSummary
+)
+
+set.seed(123)
+plsFit <- train(
+  Class ~ .,
+  data = training,
+  method = "pls",
+  preProc = c("center", "scale"),
+  tuneLength = 15,
+  trControl = ctrl,
+  metric = "ROC"
+)
+plsFit
+
 # plot results
-plot(plsFit)
+ggplot(plsFit)
+# plot(plsFit)
 
 # predict on new data
 plsClasses <- predict(plsFit, newdata = testing)
