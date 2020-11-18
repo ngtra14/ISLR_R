@@ -1,5 +1,6 @@
 # Chapter 1 Introduction to Random Forests with R -------------------------
-
+# where you can download data
+# https://bioconductor.org/packages/release/bioc/html/mixOmics.html
 # 1.5.1 Running Example: Spam Detection
 data("spam", package = "kernlab")
 set.seed(9146301)
