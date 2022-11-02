@@ -1,0 +1,72 @@
+---
+title: "LDA"
+output: html_document
+date: "2022-10-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# LDA for multi-class classification on iris data
+```{r}
+# load the data set
+data(iris)
+head(iris)
+```
+
+# split the training data and testing data
+```{r}
+
+n = nrow(iris)
+set.seed(2022)
+train_index <- sample(n, floor(0.7 * n))
+```
+# Construct model formula and
+# fit the model
+```{r}
+library(MASS)
+fit_lda <- lda(Species ~ Sepal.Length + Sepal.Width + 
+                         Petal.Length + Petal.Width,
+                         data = iris[train_index, ])
+```
+
+# make predictions
+```{r}
+pred_lda <- predict(fit_lda, newdata = iris[-train_index, ])
+```
+
+# check the perfermance
+```{r}
+table(iris[-train_index, ]$Species, pred_lda$class)
+```
+
+# use confusion matrix and others
+```{r}
+library(caret)
+confusionMatrix(iris[-train_index, "Species"], as.factor(pred_lda$class))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
