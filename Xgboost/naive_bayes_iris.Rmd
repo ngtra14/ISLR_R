@@ -1,0 +1,63 @@
+---
+title: "naive Bayes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Naive Bayes Classifier
+```{r}
+library(e1071)
+```
+## Problem to solve
+## there are three species of flowers
+
+## based on four dimension, to predict which species
+## out of three
+
+## load data set
+```{r}
+data(iris)
+head(iris, 3)
+```
+
+## split data to : train and test
+```{r}
+set.seed(2022)
+n = nrow(iris)
+train_index <- sample(n, floor(0.7 * n))
+```
+## convert Species into factor
+
+```{r}
+iris$Species <- as.factor(iris$Species)
+```
+
+## create train and test data
+```{r}
+train_data <- iris[train_index, ]
+test_data <- iris[-train_index, ]
+```
+
+## build the Naive Baye model
+```{r}
+nb_classifier <- naiveBayes(Species ~., data = train_data)
+```
+
+## make predictions on test data
+```{r}
+pred <- predict(nb_classifier, newdata = test_data)
+```
+
+## evaluate the prediction accuracy
+```{r}
+table(test_data$Species, pred)
+```
+
+```{r}
+(15 + 10 + 17) / nrow(test_data)
+```
+
+

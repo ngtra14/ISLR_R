@@ -1,0 +1,68 @@
+---
+title: "survival prediction"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## passenger survival prediction
+```{r}
+library(titanic)
+data("titanic_train")
+data("titanic_test")
+head(titanic_train)
+```
+```{r}
+colnames(titanic_train)
+```
+```{r}
+summary(titanic_train)
+```
+
+
+```{r}
+titanic_train$Survived <- as.factor(titanic_train$Survived)
+```
+
+
+```{r}
+## logistic regression
+cl_logRegr <- glm(Survived ~ Pclass + Sex + Age + SibSp + Parch +
+                             Fare + Embarked, 
+                             data = titanic_train,
+                             family = "binomial")
+```
+
+```{r}
+## make predictions on test data
+prob_test <- predict(cl_logRegr, newdata = titanic_test, type = "response")
+```
+
+```{r}
+# transform to 1 or 0 to represent surival or not
+pred <- ifelse(prob_test > 0.5, 1, 0)
+```
+
+```{r}
+# confustion matrix / table
+table(titanic_gender_class_model$Survived, pred)
+
+```
+
+```{r}
+# accuray
+(188 + 109) / nrow(titanic_gender_class_model)
+```
+
+```{r}
+# what's survival rate in test data
+table(titanic_gender_class_model$Survived)
+```
+
+```{r}
+# check how much survial rate in the test data
+141 /  nrow(titanic_gender_class_model)
+```
+

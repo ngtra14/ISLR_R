@@ -1,0 +1,108 @@
+---
+title: "naive Bayes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Naive Bayes Classifier
+```{r}
+library(e1071)
+library(mlbench)
+library(randomForest)
+```
+## Problem to solve
+## there are 6 types of glasses
+
+## based on 9 elements, to predict which type
+## out of 6
+
+## load data set
+```{r}
+data(Glass)
+head(Glass, 3)
+```
+
+## split data to : train and test
+```{r}
+set.seed(2022)
+n = nrow(Glass)
+train_index <- sample(n, floor(0.7 * n))
+```
+## convert Species into factor
+
+```{r}
+iris$Species <- as.factor(iris$Species)
+```
+
+## create train and test data
+```{r}
+train_data <- Glass[train_index, ]
+test_data <- Glass[-train_index, ]
+```
+
+## build the Naive Baye model
+```{r}
+nb_classifier <- naiveBayes(Type ~., data = train_data)
+```
+
+## make predictions on test data
+```{r}
+pred <- predict(nb_classifier, newdata = test_data)
+```
+
+## evaluate the prediction accuracy
+```{r}
+table(test_data$Type, pred)
+```
+
+```{r}
+(1 + 0 + 5 + 4 + 0 + 3) / nrow(test_data)
+```
+
+## build the random forest model
+```{r}
+rf_classifier <- randomForest(Type ~., data = train_data)
+```
+
+## make predictions on test data
+```{r}
+pred <- predict(rf_classifier, newdata = test_data)
+```
+
+## evaluate the prediction accuracy
+```{r}
+table(test_data$Type, pred)
+```
+
+```{r}
+# accuracy
+(20 + 20 + 1 + 4 + 1 + 5) / nrow(test_data)
+```
+## build a LDA model
+
+```{r}
+library(MASS)
+```
+
+```{r}
+lda_classifier <- lda(Type ~., data = train_data)
+```
+
+## make predictions on test data
+```{r}
+pred <- predict(lda_classifier, newdata = test_data)
+```
+
+## evaluate the prediction accuracy
+```{r}
+table(test_data$Type, pred$class)
+```
+
+```{r}
+# accuracy
+(16 + 14 + 0 + 4 + 0 + 5) / nrow(test_data)
+```
+
