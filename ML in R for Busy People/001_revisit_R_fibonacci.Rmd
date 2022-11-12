@@ -1,0 +1,29 @@
+---
+title: "fibonacci"
+output: html_document
+date: "2022-11-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## given an integer n, find all fibonacci numbers
+```{r}
+fibonacci <- function(n){
+  if (n == 0) {
+    return (0)
+  } 
+  else if (n == 1){
+    return (1)
+  } else {
+  return (fibonacci(n-1) + fibonacci(n-2))
+  }
+}
+```
+## test the function
+```{r}
+fibonacci(10)
+```
+
+## this code can be slow when n grows large

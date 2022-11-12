@@ -1,0 +1,28 @@
+---
+title: "create a data frame"
+output: html_document
+date: "2022-11-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## How to create a data frame in R 
+## data frame is like a table, with column names, 
+## even row names sometimes; it can be easily indexed
+```{r}
+student_names = c("jack", "sam", "sara", "lucy", "justin")
+gpa = c(3.0, 3.2, 2.4, 4.0, 3.0)
+gender = c("M", "M", "F", "F", "M")
+class1 <- data.frame(student_Id = c(1:5), 
+                     student_name = student_names,
+                     gender = gender,
+                     gpa = gpa
+)
+```
+## display the data frame
+```{r}
+class1
+```
+
