@@ -43,21 +43,21 @@ set.seed(2022)
 n = nrow(iris)
 train_index <- sample(n, floor(0.7 * n))
 test_index <- setdiff(1:n, train_index)
-learner_1$train(task, row_ids = train_index)
+learner_lda$train(task, row_ids = train_index)
 ```
 
 ```{r}
 # this is what the decision tree looks like
-print(learner_1$model)
+print(learner_lda$model)
 ```
 ```{r}
 # predict using observations from task
-prediction = learner_1$predict(task, row_ids = train_index )
+prediction = learner_lda$predict(task, row_ids = train_index )
 print(prediction)
 ```
 ```{r}
 # predict using "new" observations from an external data.frame
-prediction = learner_1$predict_newdata(newdata = iris[test_index, ])
+prediction = learner_lda$predict_newdata(newdata = iris[test_index, ])
 print(prediction)
 ```
 ## Evaluation
