@@ -1,0 +1,34 @@
+---
+title: "paste0 and paste"
+output: html_document
+date: "2023-01-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Difference between 'paste' and 'paste0'
+```{r}
+res = paste("My", "Poem", "is", "Story", "Telling")
+res
+```
+
+## if you use paste0()
+```{r}
+res = paste0("My", "Poem", "is", "Story", "Telling")
+res
+```
+
+## 0 after paste, means there is 'nothing'
+
+
+
+
+
+
+
+
+
+
+
